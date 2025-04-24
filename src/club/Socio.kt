@@ -1,6 +1,6 @@
 package club
 
-import java.util.UUID;
+import java.util.UUID
 
 class Socio(
     val nombre: String,
@@ -8,11 +8,11 @@ class Socio(
     val sexo: Sexo,
     var email: String? = null
 ){
-    val id: String = UUID.randomUUID().toString();
-    var inscripciones = mutableSetOf<Inscripcion>();
-    var pagos = mutableListOf<Pago>();
+    val id: String = UUID.randomUUID().toString()
+    private var inscripciones = mutableSetOf<Inscripcion>()
+    var pagos = mutableListOf<Pago>()
 
-    fun tomarInscripciones(): kotlin.collections.MutableSet<Inscripcion> {
-        return this.inscripciones;
+    fun tomarInscripciones(): MutableSet<Inscripcion> {
+        return this.inscripciones
     }
 }
