@@ -9,5 +9,5 @@ class Inscripcion(
 ){
     val fechaInscripcion: LocalDate = LocalDate.now()
     val id: String = UUID.randomUUID().toString()
-    var estado: EstadoInscripcion? = null
+    var estado: EstadoInscripcion = EstadoInscripcion.ACTIVA
 }
