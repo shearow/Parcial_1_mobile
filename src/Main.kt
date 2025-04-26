@@ -2,6 +2,102 @@ import club.*
 
 fun main() {
 
+        val club = Club("Los Siberianos")
+        println("Bienvenido al club ${club.nombre} 🏆")
+
+        while (true) {
+                println("\n=== Menú Principal ===")
+                println("1. Agregar Socio")
+                println("2. Agregar Disciplina")
+                println("3. Inscribir Socio a Disciplina")
+                println("4. Listar Socios")
+                println("5. Listar Disciplinas")
+                println("6. Salir")
+                print("Ingrese una opción: ")
+
+                when (readLine()?.toIntOrNull()) {
+                        1 -> {
+                                print("Nombre del socio: ")
+                                val nombre = readLine() ?: ""
+                                print("DNI del socio: ")
+                                val dni = readLine() ?: ""
+                                print("Sexo (MASCULINO/FEMENINO/OTRO): ")
+                                val sexoInput = readLine() ?: ""
+                                val sexo = Sexo.valueOf(sexoInput.uppercase())
+                                print("Email: ")
+                                val email = readLine().takeIf { it?.isNotBlank() == true }
+
+                                val socio = Socio(nombre, dni, sexo, email)
+                                try {
+                                        club.agregarSocio(socio)
+                                        println("Socio agregado")
+                                } catch (e: Exception) {
+                                        println("Error: ${e.message}")
+                                }
+                        }
+
+                        2 -> {
+                                print("Nombre de la disciplina: ")
+                                val nombre = readLine() ?: ""
+                                print("Tipo (EQUIPO/INDIVIDUAL/OPTATIVA): ")
+                                val tipoInput = readLine() ?: ""
+                                val tipo = TipoDisciplina.valueOf(tipoInput.uppercase())
+                                print("Capacidad máxima: ")
+                                val capacidad = readLine()?.toIntOrNull() ?: 0
+                                print("Costo mensual: ")
+                                val costo = readLine()?.toDoubleOrNull() ?: 0.0
+
+                                val disciplina = Disciplina(nombre, tipo, capacidad, costo)
+                                try {
+                                        club.agregarDisciplina(disciplina)
+                                        println("Disciplina agregada.")
+                                } catch (e: Exception) {
+                                        println("Error: ${e.message}")
+                                }
+                        }
+
+                        3 -> {
+                                println("Ingrese el DNI del socio:")
+                                val dniSocio = readLine() ?: ""
+                                println("Ingrese nombre de la disciplina:")
+                                val nombreDisciplina = readLine() ?: ""
+
+                                val socio = club.buscarSocioPorDni(dniSocio)
+                                val disciplina = club.buscarDisciplinaPorNombre(nombreDisciplina)
+
+                                if (socio != null && disciplina != null) {
+                                        try {
+                                                club.inscribirSocioADisciplina(socio, disciplina)
+                                                println("Inscripción realizada")
+                                        } catch (e: Exception) {
+                                                println("Error: ${e.message}")
+                                        }
+                                } else {
+                                        println("No se encontró socio o disciplina.")
+                                }
+                        }
+
+                        4 -> {
+                                println("\n**Socios Registrados**")
+                                club.tomarSocios().forEach { println("- ${it.nombre} (DNI: ${it.dni})") }
+                        }
+
+                        5 -> {
+                                println("\n**Disciplinas Disponibles**")
+                                club.tomarDisciplinas().forEach { println("- ${it.nombre} (Capacidad: ${it.capacidadMaxima})") }
+                        }
+
+                        6 -> {
+                                println("Cerrando el sistema")
+                                break
+                        }
+
+                        else -> println("Opción inválida. Intente de nuevo.")
+                }
+        }
+
+        /* EJEMPLO DE EJECUCION
+
         /*************** SOCIO - Crear Socio ***************/
         val socioTest1 = Socio("Jorge", "321231", Sexo.MASCULINO, "emailTest@gmail.com")
         val socioTest2 = Socio("Maria", "3123", Sexo.FEMENINO)
@@ -218,7 +314,7 @@ fun main() {
         socioTest2.tomarPagos().forEach { println("Disciplina: ${it.disciplina.nombre}, Mes: ${it.mesCuota}, Anio: ${it.anioCuota}, Monto: ${it.monto}, Fecha de pago: ${it.fechaDePago}") }
 
 
-        /*************** CLUB -  ***************/
+        */
 
 
 }
