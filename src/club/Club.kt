@@ -81,36 +81,41 @@ class Club(
             return
         }
         inscripcionBuscada.estado = EstadoInscripcion.CANCELADA
-
-        val diaActual = LocalDate.now()
-        if(socio.tomarPagos().none { it.mesCuota == diaActual.month && it.disciplina == disciplina }) {
-            val nuevaDeuda = Deuda(disciplina, diaActual.year, diaActual.month, disciplina.costoMensual, RazonDeuda.CUOTA_MENSUAL)
-            socio.agregarDeuda(nuevaDeuda)
-        }
     }
 
-    fun procesarMesNuevo(){
+    fun procesarMesNuevo() {
         val diaActual = LocalDate.now()
 
         this.socios.forEach { socio ->
-            val inscripcionesActivas = socio.tomarInscripciones().filter { it.estado == EstadoInscripcion.ACTIVA }
+            val inscripcionesProcesables = socio.tomarInscripciones().filter {
+                it.estado == EstadoInscripcion.ACTIVA || it.estado == EstadoInscripcion.CANCELADA
+            }
 
-            inscripcionesActivas.forEach { inscripcion ->
+            inscripcionesProcesables.forEach { inscripcion ->
                 val disciplina = inscripcion.disciplina
 
-                val mesAnterior = diaActual.minusMonths(1)
-                val deudaMesAnterior = socio.tomarDeudas().any {
-                    it.disciplina == disciplina
-                    && it.mes == mesAnterior.month
-                    && it.anio == mesAnterior.year
-                }
+                when (inscripcion.estado) {
+                    EstadoInscripcion.CANCELADA -> {
+                        inscripcion.estado = EstadoInscripcion.INACTIVA
+                        disciplina.eliminarInscripcion(socio)
+                    }
+                    EstadoInscripcion.ACTIVA -> {
+                        val mesAnterior = diaActual.minusMonths(1)
+                        val deudaMesAnterior = socio.tomarDeudas().any {
+                            it.disciplina == disciplina &&
+                            it.mes == mesAnterior.month &&
+                            it.anio == mesAnterior.year
+                        }
 
-                if(deudaMesAnterior){
-                    inscripcion.estado = EstadoInscripcion.INACTIVA
-                    disciplina.eliminarInscripcion(socio)
-                }else{
-                    val nuevaDeuda = Deuda(disciplina, diaActual.year, diaActual.month, disciplina.costoMensual, RazonDeuda.CUOTA_MENSUAL)
-                    socio.agregarDeuda(nuevaDeuda)
+                        if(deudaMesAnterior){
+                            inscripcion.estado = EstadoInscripcion.INACTIVA
+                            disciplina.eliminarInscripcion(socio)
+                        }else{
+                            val nuevaDeuda = Deuda(disciplina, diaActual.year, diaActual.month, disciplina.costoMensual, RazonDeuda.CUOTA_MENSUAL)
+                            socio.agregarDeuda(nuevaDeuda)
+                        }
+                    }
+                    else -> {}
                 }
             }
         }
