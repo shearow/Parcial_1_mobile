@@ -120,4 +120,12 @@ class Club(
             }
         }
     }
+
+    fun buscarSocioPorDni(dni: String): Socio? {
+        return socios.find { it.dni == dni }
+    }
+
+    fun buscarDisciplinaPorNombre(nombre: String): Disciplina? {
+        return disciplinas.find { it.nombre.equals(nombre, ignoreCase = true) }
+    }
 }
