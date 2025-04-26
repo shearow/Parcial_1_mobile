@@ -1,4 +1,6 @@
 import club.*
+import exceptions.SexoInvalidoException
+import exceptions.TipoDisciplinaInvalidoException
 
 fun main() {
 
@@ -26,7 +28,13 @@ fun main() {
                                 val dni = readLine() ?: ""
                                 print("Sexo (MASCULINO/FEMENINO/OTRO): ")
                                 val sexoInput = readLine() ?: ""
-                                val sexo = Sexo.valueOf(sexoInput.uppercase())
+
+                                val sexo = try {
+                                        Sexo.valueOf(sexoInput.uppercase())
+                                } catch (e: IllegalArgumentException) {
+                                        throw SexoInvalidoException()
+                                }
+
                                 print("Email: ")
                                 val email = readLine().takeIf { it?.isNotBlank() == true }
 
@@ -44,7 +52,13 @@ fun main() {
                                 val nombre = readLine() ?: ""
                                 print("Tipo (EQUIPO/INDIVIDUAL/OPTATIVA): ")
                                 val tipoInput = readLine() ?: ""
-                                val tipo = TipoDisciplina.valueOf(tipoInput.uppercase())
+
+                                val tipo = try {
+                                        TipoDisciplina.valueOf(tipoInput.uppercase())
+                                } catch (e: IllegalArgumentException) {
+                                        throw TipoDisciplinaInvalidoException()
+                                }
+
                                 print("Capacidad máxima: ")
                                 val capacidad = readLine()?.toIntOrNull() ?: 0
                                 print("Costo mensual: ")
@@ -89,7 +103,6 @@ fun main() {
                                         println("No se encontró socio o disciplina.")
                                 }
                         }
-
 
                         6 -> {
                                 println("Ingrese el DNI del socio:")
