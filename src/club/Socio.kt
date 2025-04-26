@@ -57,4 +57,12 @@ class Socio(
     fun tieneDeudas(): Boolean {
         return this.deudas.isNotEmpty()
     }
+
+    fun obtenerDeudas(): List<Deuda> {
+        return deudas
+    }
+
+    fun obtenerPagos(): List<Pago> {
+        return pagos
+    }
 }

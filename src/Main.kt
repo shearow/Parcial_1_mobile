@@ -9,10 +9,13 @@ fun main() {
                 println("\n=== Menú Principal ===")
                 println("1. Agregar Socio")
                 println("2. Agregar Disciplina")
-                println("3. Inscribir Socio a Disciplina")
-                println("4. Listar Socios")
-                println("5. Listar Disciplinas")
-                println("6. Salir")
+                println("3. Listar Socios")
+                println("4. Listar Disciplinas")
+                println("5. Inscribir Socio a Disciplina")
+                println("6. Ver Deudas de un Socio")
+                println("7. Pago de una deuda")
+                println("8. Ver Pagos de un Socio")
+                println("9. Salir")
                 print("Ingrese una opción: ")
 
                 when (readLine()?.toIntOrNull()) {
@@ -57,6 +60,16 @@ fun main() {
                         }
 
                         3 -> {
+                                println("\n**Socios Registrados**")
+                                club.tomarSocios().forEach { println("- ${it.nombre} (DNI: ${it.dni})") }
+                        }
+
+                        4 -> {
+                                println("\n**Disciplinas Disponibles**")
+                                club.tomarDisciplinas().forEach { println("- ${it.nombre} (Capacidad: ${it.capacidadMaxima})") }
+                        }
+
+                        5 -> {
                                 println("Ingrese el DNI del socio:")
                                 val dniSocio = readLine() ?: ""
                                 println("Ingrese nombre de la disciplina:")
@@ -77,21 +90,84 @@ fun main() {
                                 }
                         }
 
-                        4 -> {
-                                println("\n**Socios Registrados**")
-                                club.tomarSocios().forEach { println("- ${it.nombre} (DNI: ${it.dni})") }
-                        }
-
-                        5 -> {
-                                println("\n**Disciplinas Disponibles**")
-                                club.tomarDisciplinas().forEach { println("- ${it.nombre} (Capacidad: ${it.capacidadMaxima})") }
-                        }
 
                         6 -> {
+                                println("Ingrese el DNI del socio:")
+                                val dniSocio = readLine() ?: ""
+
+                                val socio = club.buscarSocioPorDni(dniSocio)
+
+                                if (socio != null) {
+                                        val deudas = socio.obtenerDeudas()  // suponiendo que Socio tiene una lista 'deudas'
+                                        if (deudas.isNotEmpty()) {
+                                                println("Deudas del socio ${socio.nombre}:")
+                                                deudas.forEach { deuda ->
+                                                        println("- ${deuda.mes} ${deuda.anio} | ${deuda.disciplina.nombre} | \$${deuda.monto} | ${deuda.razonDeuda} ${deuda.detalles ?: ""}")
+                                                }
+                                        } else {
+                                                println("El socio no tiene deudas.")
+                                        }
+                                } else {
+                                        println("No se encontró el socio.")
+                                }
+                        }
+
+                        7 -> {
+                                println("Ingrese el DNI del socio:")
+                                val dniSocio = readLine() ?: ""
+                                val socio = club.buscarSocioPorDni(dniSocio)
+
+                                if (socio != null) {
+                                        println("Ingrese el nombre de la disciplina para pagar la deuda:")
+                                        val nombreDisciplina = readLine() ?: ""
+                                        val disciplina = club.buscarDisciplinaPorNombre(nombreDisciplina)
+
+                                        if (disciplina != null) {
+                                                try {
+                                                        val deudaEncontrada = socio.tomarDeudaEnDisciplina(disciplina)
+
+                                                        if (deudaEncontrada != null) {
+                                                                club.pagarDeuda(socio, deudaEncontrada)
+                                                                println("Deuda pagada correctamente.")
+                                                        } else {
+                                                                println("No hay deuda pendiente para esa disciplina.")
+                                                        }
+                                                } catch (e: Exception) {
+                                                        println("Error: ${e.message}")
+                                                }
+                                        } else {
+                                                println("No se encontró la disciplina.")
+                                        }
+                                } else {
+                                        println("No se encontró el socio.")
+                                }
+                        }
+
+                        8 -> {
+                                println("Ingrese el DNI del socio:")
+                                val dniSocio = readLine() ?: ""
+
+                                val socio = club.buscarSocioPorDni(dniSocio)
+
+                                if (socio != null) {
+                                        val pagos = socio.obtenerPagos()  // suponiendo que Socio tiene una lista 'pagos'
+                                        if (pagos.isNotEmpty()) {
+                                                println("Pagos del socio ${socio.nombre}:")
+                                                pagos.forEach { pago ->
+                                                        println("- ${pago.anioCuota} | ${pago.mesCuota} | \$${pago.monto}")
+                                                }
+                                        } else {
+                                                println("El socio no tiene pagos registrados.")
+                                        }
+                                } else {
+                                        println("No se encontró el socio.")
+                                }
+
+                        }
+                        9 -> {
                                 println("Cerrando el sistema")
                                 break
                         }
-
                         else -> println("Opción inválida. Intente de nuevo.")
                 }
         }
