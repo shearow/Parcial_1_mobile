@@ -1,23 +1,22 @@
 package club
 
 import java.util.UUID
-import exceptions.UsuarioInscriptoException
-import exceptions.CuposCompletosException
 
 class Disciplina(
     var nombre: String,
     var tipo: TipoDisciplina,
-    capacidadMaxima: Int
+    capacidadMaxima: Int,
+    var costoMensual: Double
 ){
     val id: String = UUID.randomUUID().toString()
     var capacidadMaxima: Int = if(capacidadMaxima < 0) 0 else capacidadMaxima
     private var sociosInscriptos = mutableSetOf<Socio>()
 
     private fun validarSocioYaInscripto(socio: Socio): Boolean {
-        return this.sociosInscriptos.any { it === socio }
+        return this.sociosInscriptos.any { it == socio }
     }
 
-    fun validarDisponibilidadCupos(): Boolean {
+    fun tieneCuposDisponibles(): Boolean {
         return capacidadMaxima > this.sociosInscriptos.size
     }
 
@@ -26,12 +25,6 @@ class Disciplina(
     }
 
     fun agregarInscripcion(socio: Socio){
-        if(this.validarSocioYaInscripto(socio)){
-            throw UsuarioInscriptoException("El usuario ${socio.nombre} ya se encontraba inscripto en la disciplina ${this.nombre}")
-        }
-        if(!validarDisponibilidadCupos()){
-            throw CuposCompletosException("Cupos agotados en la disciplina ${this.nombre}")
-        }
         this.sociosInscriptos.add(socio)
     }
 

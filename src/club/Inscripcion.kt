@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 class Inscripcion(
-    val socio: Socio,
     val disciplina: Disciplina
 ){
     val fechaInscripcion: LocalDate = LocalDate.now()
