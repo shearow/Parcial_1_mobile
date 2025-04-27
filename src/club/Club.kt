@@ -18,7 +18,15 @@ class Club(
         this.socios.add(socio)
     }
 
-    private fun socioYaRegistrado(dni: String, sexo: Sexo): Boolean {
+//    fun eliminarSocio(socio: Socio){
+//        if(this.socioYaRegistrado(socio.dni, socio.sexo)){
+//            this.socios.remove(socio)
+//        }else {
+//            throw Exception("Socio inexistente.")
+//        }
+//    }
+
+    private fun socioYaRegistrado(dni: Int, sexo: Sexo): Boolean {
         return this.socios.any { it.dni == dni && it.sexo == sexo}
     }
 
@@ -40,7 +48,17 @@ class Club(
         this.disciplinas.add(disciplina)
     }
 
-    private fun disciplinaYaRegistrada(nombre: String): Boolean {
+    fun eliminarDisciplina(disciplina: String) {
+        if(this.disciplinaYaRegistrada(disciplina)) {
+            val disciplinaAEliminar = buscarDisciplinaPorNombre(disciplina)
+            this.disciplinas.remove(disciplinaAEliminar)
+            println("Disciplina Eliminada Correctamente.")
+        } else {
+            throw Exception("Disiplina Inexistente.")
+        }
+    }
+
+    fun disciplinaYaRegistrada(nombre: String): Boolean {
         return this.disciplinas.any { it.nombre == nombre}
     }
 
@@ -83,6 +101,19 @@ class Club(
         inscripcionBuscada.estado = EstadoInscripcion.CANCELADA
     }
 
+    // INTENTO DE FUNCION
+//    fun darDeBajaInscripcion(socioInput: Int, disciplinaInput: String){
+//
+//        val disciplina = buscarDisciplinaPorNombre(disciplinaInput)
+//        val socio = buscarSocioPorDni(socioInput)
+//        if () {
+//
+//        }
+//        val inscripcionBuscada = socio!!.tomarInscripciones().find { it.disciplina == disciplina }
+//
+//        inscripcionBuscada!!.estado = EstadoInscripcion.INACTIVA
+//    }
+
     fun procesarMesNuevo() {
         val diaActual = LocalDate.now()
 
@@ -121,7 +152,7 @@ class Club(
         }
     }
 
-    fun buscarSocioPorDni(dni: String): Socio? {
+    fun buscarSocioPorDni(dni: Int): Socio? {
         return socios.find { it.dni == dni }
     }
 

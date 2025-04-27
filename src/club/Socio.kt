@@ -4,7 +4,7 @@ import java.util.*
 
 class Socio(
     val nombre: String,
-    val dni: String,
+    val dni: Int,
     val sexo: Sexo,
     var email: String? = null
 ){
