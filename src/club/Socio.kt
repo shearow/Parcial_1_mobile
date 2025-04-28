@@ -22,16 +22,19 @@ class Socio(
         this.inscripciones.add(Inscripcion(disciplina))
     }
 
+    fun eliminarInscripcion(disciplina: Disciplina){
+        val inscripcion = this.inscripciones.find { it.disciplina == disciplina }
+        if (inscripcion != null){
+            this.inscripciones.remove(inscripcion)
+        }
+    }
+
+    fun mostrarDatos(){
+        println("-Nombre: ${this.nombre}, DNI: ${this.dni}, Sexo: ${this.sexo}")
+    }
+
     fun tomarInscripciones(): MutableSet<Inscripcion> {
         return this.inscripciones
-    }
-
-    fun tomarPagos(): MutableList<Pago> {
-        return this.pagos
-    }
-
-    fun tomarDeudas(): MutableList<Deuda> {
-        return this.deudas
     }
 
     fun tomarDeudaEnDisciplina(disciplina: Disciplina?): Deuda? {
@@ -52,6 +55,10 @@ class Socio(
 
     fun estaInscriptoEnDisciplina(disciplina: Disciplina): Boolean {
         return this.inscripciones.any { it.disciplina == disciplina && it.estado != EstadoInscripcion.INACTIVA }
+    }
+
+    fun tieneInscripcion(disciplina: Disciplina): Boolean {
+        return this.inscripciones.any { it.disciplina == disciplina }
     }
 
     fun tieneDeudas(): Boolean {

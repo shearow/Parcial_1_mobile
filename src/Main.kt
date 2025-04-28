@@ -1,6 +1,4 @@
 import club.*
-import exceptions.SexoInvalidoException
-import exceptions.TipoDisciplinaInvalidoException
 
 fun main() {
 
@@ -8,7 +6,6 @@ fun main() {
         println("Bienvenido al club ${club.nombre} 🏆")
 
         while (true) {
-
                 println("\n=== Menú Principal ===")
                 println("1. Agregar Socio")
                 println("2. Agregar Disciplina")
@@ -20,463 +17,329 @@ fun main() {
                 println("8. Pago de una deuda")
                 println("9. Ver Pagos de un Socio")
                 println("10. Eliminar Disciplina")
-                println("11. Dar de Baja un Socio")
-                println("12. Salir")
+                println("11. Desinscribir Socio en Disciplina")
+                println("12. Actualizar mes (SE DEBERIA EJECUTAR EL PRIMER DIA DE CADA MES DE FORMA AUTOMATICA a PRIMERA HORA) - (Agrega cuotas mensuales a los socios inscriptos y liberando socios inactivos en disciplinas)")
+                println("13. Salir")
                 print("Ingrese una opción: ")
 
-                when (readLine()?.toIntOrNull()) {
+                when (readlnOrNull()?.toIntOrNull()) {
                         1 -> {
-                                var nombre: String
-                                while (true) {
-                                        print("Nombre del socio: ")
-                                        val nombreInput = readLine()?.trim() ?: ""
+                                val nombre = ingresarNombre()
+                                val dni = ingresarDNI()
+                                val sexo = ingresarSexo()
+                                val email = ingresarEmail()
 
-                                        if (nombreInput.isEmpty()) {
-                                                println("Debes completar el nombre para continuar.")
-                                        } else if (nombreInput.any { it.isDigit() }) {
-                                                println("El nombre no debe contener números.")
-                                        } else {
-                                                nombre = nombreInput
-                                                break
-                                        }
-                                }
-
-                                print("DNI del socio: ")
-                                val input = readLine()
-                                val dni = input?.toIntOrNull()
-                                print("Sexo (MASCULINO/FEMENINO/OTRO): ")
-                                val sexoInput = readLine() ?: ""
-
-                                val sexo = try {
-                                        Sexo.valueOf(sexoInput.uppercase())
-                                } catch (e: IllegalArgumentException) {
-                                        throw SexoInvalidoException()
-                                }
-
-                                print("Email: ")
-                                val email = readLine().takeIf { it?.isNotBlank() == true }
-
-                                if (dni != null) {
-                                        val socio = Socio(nombre, dni, sexo, email)
-                                        try {
-                                                club.agregarSocio(socio)
-                                                println("Socio agregado")
-                                        } catch (e: Exception) {
-                                                println("Error: ${e.message}")
-                                        }
-                                } else {
-                                        println("El dni no puede estar vacío.")
-                                }
-                        }
-
-                        2 -> {
-                                print("Nombre de la disciplina: ")
-                                val nombre = readLine() ?: ""
-                                print("Tipo (EQUIPO/INDIVIDUAL/OPTATIVA): ")
-                                val tipoInput = readLine() ?: ""
-
-                                val tipo = try {
-                                        TipoDisciplina.valueOf(tipoInput.uppercase())
-                                } catch (e: IllegalArgumentException) {
-                                        throw TipoDisciplinaInvalidoException()
-                                }
-
-                                print("Capacidad máxima: ")
-                                val capacidad = readLine()?.toIntOrNull() ?: 0
-                                print("Costo mensual: ")
-                                val costo = readLine()?.toDoubleOrNull() ?: 0.0
-
-                                val disciplina = Disciplina(nombre, tipo, capacidad, costo)
                                 try {
-                                        club.agregarDisciplina(disciplina)
-                                        println("Disciplina agregada.")
+                                        club.agregarSocio(Socio(nombre, dni, sexo, email))
+                                        println("Socio $nombre agregado correctamente.")
                                 } catch (e: Exception) {
                                         println("Error: ${e.message}")
                                 }
                         }
+                        2 -> {
+                                val nombre = ingresarDisciplina()
+                                val tipo = ingresarTipoDisciplina()
+                                val capacidad = ingresarCapacidadMaxima()
+                                val costo = ingresarCostoMensual()
 
+                                try {
+                                        club.agregarDisciplina(Disciplina(nombre, tipo, capacidad, costo))
+                                        println("Disciplina $nombre agregada correctamente.")
+                                } catch (e: Exception) {
+                                        println("Error: ${e.message}")
+                                }
+                        }
                         3 -> {
                                 println("\n**Socios Registrados**")
-                                club.tomarSocios().forEach { println("- ${it.nombre} (DNI: ${it.dni})") }
+                                club.tomarSocios().forEach { it.mostrarDatos() }
                         }
-
                         4 -> {
                                 println("\n**Disciplinas Disponibles**")
                                 club.tomarDisciplinas().forEach { println("- ${it.nombre} (Capacidad: ${it.capacidadMaxima})") }
                         }
-
                         5 -> {
-                                println("Ingrese el DNI del socio:")
-                                val input = readLine()
-                                val dniSocio = input?.toIntOrNull()
+                                println("Ingrese los datos del socio: ")
+                                val dni = ingresarDNI()
+                                val sexo = ingresarSexo()
+                                val nombreDisciplina = ingresarDisciplina()
 
-
-                                if (dniSocio != null) {
-                                        println("DNI ingresado correctamente: $dniSocio")
-
-                                        println("Ingrese nombre de la disciplina:")
-                                        val nombreDisciplina = readLine() ?: ""
-
-                                        val socio = club.buscarSocioPorDni(dniSocio)
-                                        val disciplina = club.buscarDisciplinaPorNombre(nombreDisciplina)
-
-                                        if (socio != null && disciplina != null) {
-                                                try {
-                                                        club.inscribirSocioADisciplina(socio, disciplina)
-                                                        println("Inscripción realizada")
-                                                } catch (e: Exception) {
-                                                        println("Error: ${e.message}")
-                                                }
-                                        } else {
-                                                println("Error: No se encontró socio/disciplina.")
-                                        }
-                                } else {
-                                        println("El valor ingresado no es un número válido.")
-                                }
-
-                        }
-
-                        6 -> {
-                                println("Ingrese el nombre de la disciplina:")
-                                val nombreDisciplina = readLine() ?: ""
+                                val socio = club.buscarSocioPorDniYSexo(dni, sexo)
                                 val disciplina = club.buscarDisciplinaPorNombre(nombreDisciplina)
 
-                                if (nombreDisciplina == club.buscarDisciplinaPorNombre(nombreDisciplina)!!.nombre) {
-                                        disciplina!!.tomarSociosInscriptos().forEach {
-                                                println("Inscriptos en ${disciplina.nombre}")
-                                                disciplina.tomarSociosInscriptos().forEach{ println("- nombre: ${it.nombre}   dni: ${it.dni}") }
+                                if (socio != null && disciplina != null) {
+                                        try {
+                                                club.inscribirSocioADisciplina(socio, disciplina)
+                                                println("Inscripción realizada.")
+                                        } catch (e: Exception) {
+                                                println("Error: ${e.message}")
                                         }
+                                } else if (socio == null){
+                                        println("Error: El socio con DNI $dni y sexo $sexo no existe.")
+                                } else {
+                                        println("Error: La disciplina $nombreDisciplina no existe.")
                                 }
                         }
+                        6 -> {
+                                println("Ingrese el nombre de la disciplina:")
+                                val nombreDisciplina = ingresarDisciplina()
+                                val disciplina = club.buscarDisciplinaPorNombre(nombreDisciplina)
 
+                                if (disciplina != null) {
+                                        println("Socios inscriptos en la disciplina: ${disciplina.nombre}")
+                                        val sociosInscriptos = disciplina.tomarSociosInscriptos()
+
+                                        if (sociosInscriptos.isNotEmpty()) {
+                                                sociosInscriptos.forEach {
+                                                        it.mostrarDatos()
+                                                }
+                                        } else {
+                                                println("No hay socios inscriptos en esta disciplina.")
+                                        }
+                                } else {
+                                        println("No existe una disciplina con el nombre '$nombreDisciplina'.")
+                                }
+                        }
                         7 -> {
-                                println("Ingrese el DNI del socio:")
-                                val input = readLine()
-                                val dniSocio = input?.toIntOrNull()
+                                println("Ingrese los datos del socio:")
+                                val dni = ingresarDNI()
+                                val sexo = ingresarSexo()
 
-                                if(dniSocio != null) {
-                                        val socio = club.buscarSocioPorDni(dniSocio)
+                                val socio = club.buscarSocioPorDniYSexo(dni, sexo)
 
-                                        if (socio != null) {
-                                                val deudas = socio.obtenerDeudas()  // suponiendo que Socio tiene una lista 'deudas'
-                                                if (deudas.isNotEmpty()) {
-                                                        println("Deudas del socio ${socio.nombre}:")
-                                                        deudas.forEach { deuda ->
-                                                                println("- ${deuda.mes} ${deuda.anio} | ${deuda.disciplina.nombre} | \$${deuda.monto} | ${deuda.razonDeuda} ${deuda.detalles ?: ""}")
-                                                        }
-                                                } else {
-                                                        println("El socio no tiene deudas.")
+                                if (socio != null) {
+                                        val deudas = socio.obtenerDeudas()
+                                        if (deudas.isNotEmpty()) {
+                                                println("Deudas del socio ${socio.nombre}:")
+                                                deudas.forEach { deuda ->
+                                                        println("- ${deuda.mes} ${deuda.anio} | ${deuda.disciplina.nombre} | \$${deuda.monto} | ${deuda.razonDeuda} ${deuda.detalles ?: ""}")
                                                 }
                                         } else {
-                                                println("No se encontró el socio.")
+                                                println("El socio no tiene deudas.")
                                         }
+                                } else {
+                                        println("No existe el socio con DNI $dni y sexo $sexo.")
                                 }
-
                         }
-
                         8 -> {
-                                println("Ingrese el DNI del socio:")
-                                val input = readLine()
-                                val dniSocio = input?.toIntOrNull()
+                                println("Ingrese los datos del socio:")
+                                val dni = ingresarDNI()
+                                val sexo = ingresarSexo()
+                                val nombreDisciplina = ingresarDisciplina()
 
-                                if (dniSocio != null) {
-                                        val socio = club.buscarSocioPorDni(dniSocio)
+                                val socio = club.buscarSocioPorDniYSexo(dni, sexo)
+                                val disciplina = club.buscarDisciplinaPorNombre(nombreDisciplina)
 
-                                        if (socio != null) {
-                                                println("Ingrese el nombre de la disciplina para pagar la deuda:")
-                                                val nombreDisciplina = readLine() ?: ""
-                                                val disciplina = club.buscarDisciplinaPorNombre(nombreDisciplina)
+                                if (socio != null && disciplina != null) {
+                                        try {
+                                                val deudaEncontrada = socio.tomarDeudaEnDisciplina(disciplina)
 
-                                                if (disciplina != null) {
-                                                        try {
-                                                                val deudaEncontrada = socio.tomarDeudaEnDisciplina(disciplina)
-
-                                                                if (deudaEncontrada != null) {
-                                                                        club.pagarDeuda(socio, deudaEncontrada)
-                                                                        println("Deuda pagada correctamente.")
-                                                                } else {
-                                                                        println("No hay deuda pendiente para esa disciplina.")
-                                                                }
-                                                        } catch (e: Exception) {
-                                                                println("Error: ${e.message}")
-                                                        }
+                                                if (deudaEncontrada != null) {
+                                                        club.pagarDeuda(socio, deudaEncontrada)
+                                                        println("Deuda pagada correctamente.")
                                                 } else {
-                                                        println("No se encontró la disciplina.")
+                                                        println("No hay deuda pendiente para esa disciplina.")
                                                 }
-                                        } else {
-                                                println("No se encontró el socio.")
+                                        } catch (e: Exception) {
+                                                println("Error: ${e.message}")
                                         }
+                                } else if (socio == null){
+                                        println("Error: El socio con DNI $dni y sexo $sexo no existe.")
+                                } else {
+                                        println("Error: La disciplina $nombreDisciplina no existe.")
                                 }
-
                         }
-
                         9 -> {
-                                println("Ingrese el DNI del socio:")
-                                val input = readLine()
-                                val dniSocio = input?.toIntOrNull()
+                                println("Ingrese los datos del socio:")
+                                val dni = ingresarDNI()
+                                val sexo = ingresarSexo()
 
-                                if (dniSocio != null) {
-                                        val socio = club.buscarSocioPorDni(dniSocio)
+                                val socio = club.buscarSocioPorDniYSexo(dni, sexo)
 
-                                        if (socio != null) {
-                                                val pagos = socio.obtenerPagos()  // suponiendo que Socio tiene una lista 'pagos'
-                                                if (pagos.isNotEmpty()) {
-                                                        println("Pagos del socio ${socio.nombre}:")
-                                                        pagos.forEach { pago ->
-                                                                println("- ${pago.anioCuota} | ${pago.mesCuota} | \$${pago.monto}")
-                                                        }
-                                                } else {
-                                                        println("El socio no tiene pagos registrados.")
+                                if (socio != null) {
+                                        val pagos = socio.obtenerPagos()
+                                        if (pagos.isNotEmpty()) {
+                                                println("Pagos del socio ${socio.nombre}:")
+                                                pagos.forEach { pago ->
+                                                        println("- ${pago.anioCuota} | ${pago.mesCuota} | \$${pago.monto}")
                                                 }
                                         } else {
-                                                println("No se encontró el socio.")
+                                                println("El socio no tiene pagos registrados.")
                                         }
+                                } else {
+                                        println("No existe el socio con DNI $dni y sexo $sexo.")
                                 }
-
-
                         }
                         10 -> {
-                                println("Ingrese el nombre de la disciplina:")
-                                val nombreDisciplina = readLine() ?: ""
-                                club.eliminarDisciplina(nombreDisciplina)
+                                val nombreDisciplina = ingresarDisciplina()
+
+                                try {
+                                        club.eliminarDisciplina(nombreDisciplina)
+                                } catch (e: Exception) {
+                                        println("Error: ${e.message}")
+                                }
                         }
                         11 -> {
-                                println("Ingrese el DNI del socio: ")
-                                val input = readLine()
-                                val dniSocio = input?.toIntOrNull()
-                                println("Ingrese el nombre de la disciplina:")
-                                val nombreDisciplina = readLine() ?: ""
+                                println("Ingrese los datos del socio: ")
+                                val dni = ingresarDNI()
+                                val sexo = ingresarSexo()
+                                val nombreDisciplina = ingresarDisciplina()
 
+                                val socio = club.buscarSocioPorDniYSexo(dni, sexo)
+                                val disciplina = club.buscarDisciplinaPorNombre(nombreDisciplina)
 
+                                if (socio != null && disciplina != null) {
+                                        try {
+                                                club.cancelarInscripcion(socio, disciplina)
+                                                println("Inscripción cancelada correctamente.")
+                                        } catch (e: Exception) {
+                                                println("Error al cancelar la inscripción: ${e.message}")
+                                        }
+                                } else if (socio == null){
+                                        println("Error: El socio con DNI $dni y sexo $sexo no existe.")
+                                } else {
+                                        println("Error: La disciplina $nombreDisciplina no existe.")
+                                }
                         }
                         12 -> {
+                                println("Actualizando mes en el sistema")
+                                club.procesarMesNuevo()
+                        }
+                        13 -> {
                                 println("Cerrando el sistema")
                                 break
                         }
                         else -> println("Opción inválida. Intente de nuevo.")
                 }
         }
-
-        /* EJEMPLO DE EJECUCION
-
-        /*************** SOCIO - Crear Socio ***************/
-        val socioTest1 = Socio("Jorge", "321231", Sexo.MASCULINO, "emailTest@gmail.com")
-        val socioTest2 = Socio("Maria", "3123", Sexo.FEMENINO)
-
-
-        /*************** DISCIPLINA - Crear disciplina ***************/
-        val disciplina1 = Disciplina("Futbol", TipoDisciplina.EQUIPO, 2, 15000.0)
-        val disciplina2 = Disciplina("Basquet", TipoDisciplina.EQUIPO, 10, 20000.0)
-        val disciplina3 = Disciplina("Natacion", TipoDisciplina.OPTATIVA, 30, 10000.0)
-        val disciplina4 = Disciplina("Gimnasio", TipoDisciplina.INDIVIDUAL, 50, 20000.0)
-
-
-
-        /////////////////////////////////////////////////////////////////////////////////////////
-        //////////////////////////////////// DISCIPLINA ////////////////////////////////////////
-        /////////////////////////////////////////////////////////////////////////////////////////
-
-        /*************** DISCIPLINA - Atributos y funcionalidad ***************/
-        println("\n•Disciplina atributos:")
-        println("Id: ${disciplina1.id}, Nombre: ${disciplina1.nombre}, Tipo: ${disciplina1.tipo}, Capacidad maxima: ${disciplina1.capacidadMaxima}, costo mensual: ${disciplina1.costoMensual}")
-        println("Cantidad de cupos disponibles: ${disciplina1.cantidadCuposDisponibles()}")
-        println("Hay cupo disponible? ${disciplina1.tieneCuposDisponibles()}")
-
-
-        /*************** DISCIPLINA - Agregar inscripto ***************/
-        println("\n•Agregar inscripto:")
-        println("Agregando al usuario1:")
-        try{
-                disciplina1.agregarInscripcion(socioTest1)
-                println("Usuario agregado exitosamente en la disciplina ${disciplina1.nombre}.")
-        }catch(e: Exception){
-                println("El usuario ${socioTest1.nombre} no pudo ser anotado en ${disciplina1.nombre} por la siguiente razòn: ${e.message}.")
-        }
-
-        println("\nAgregando al usuario1 a la misma disciplina:")
-        try{
-                disciplina1.agregarInscripcion(socioTest1)
-                println("Usuario agregado exitosamente en la disciplina ${disciplina1.nombre}")
-        }catch(e: Exception){
-                println("El usuario ${socioTest1.nombre} no pudo ser anotado en ${disciplina1.nombre} por la siguiente razon: ${e.message}")
-        }
-
-        println("\nAgregando al usuario2:")
-        try{
-                disciplina1.agregarInscripcion(socioTest2)
-                println("Usuario agregado exitosamente en la disciplina ${disciplina1.nombre}")
-        }catch(e: Exception){
-                println("El usuario ${socioTest2.nombre} no pudo ser anotado en ${disciplina1.nombre} por la siguiente razon: ${e.message}")
-        }
-
-
-        /*************** DISCIPLINA - Tomar todos los inscriptos ***************/
-        println("\n•Recorriendo socios inscriptos en la disciplina ${disciplina1.nombre}:")
-        disciplina1.tomarSociosInscriptos().forEach { println("Nombre: ${it.nombre}, Id: ${it.id}") }
-
-
-        /*************** DISCIPLINA - Eliminar inscripto ***************/
-        println("\n•Eliminando al socio1 (${socioTest1.nombre}): ")
-
-        if(disciplina1.eliminarInscripcion(socioTest1)){
-                println("${socioTest1.nombre} eliminado correctamente")
-        }else{
-                println("${socioTest1.nombre} no estaba inscripto en la disciplina ${disciplina1.nombre}")
-        }
-
-
-        /*************** DISCIPLINA - Cambiar precio ***************/
-        println("\n•Cambiando costo mensual de la disciplina ${disciplina1.nombre}: " +
-                "\nPrecio viejo: ${disciplina1.nombre}. ")
-        disciplina1.costoMensual = 10000.0
-        println("Precio actual: ${disciplina1.costoMensual}")
-
-
-        /////////////////////////////////////////////////////////////////////////////////////////
-        //////////////////////////////////// CLUB ///////////////////////////////////////////////
-        /////////////////////////////////////////////////////////////////////////////////////////
-
-
-        /*************** CLUB - Instanciar Club ***************/
-        val club = Club("Los Siberianos")
-        println("\nBienvenidos al club ${club.nombre}")
-
-        /*************** CLUB - Agregar socio ***************/
-        println("\n•Agregando socios al club.")
-        try{
-                club.agregarSocio(socioTest1)
-                println("-Nuevo socio ${socioTest1.nombre} agregado correctamente al club.")
-
-                club.agregarSocio(socioTest2)
-                println("Nuevo socio ${socioTest2.nombre} agregado correctamente al club.")
-
-                club.agregarSocio(socioTest1)
-        }catch(e : Exception){
-                println(e.message)
-        }
-
-
-        /*************** CLUB - Pintar datos de los socios ***************/
-        println("Datos de los socios:")
-        club.pintarInformacionSocios()
-
-
-        /*************** CLUB - Tomar colección de todos los socios ***************/
-        println("\n•Cantidad de Socios totales registrados: ${club.tomarSocios().size}.")
-
-
-        /*************** CLUB - Agregar disciplina al club ***************/
-        println("\n•Agregando disciplina ${disciplina1.nombre} al club:")
-        try{
-                club.agregarDisciplina(disciplina1)
-                println("Se agrego correctamente la disciplina ${disciplina1.nombre}, cupos disponibles: ${disciplina1.cantidadCuposDisponibles()}")
-        }catch(e: Exception){
-                println(e.message)
-        }
-
-        println("\n-Agregando disciplina ${disciplina2.nombre} al club:")
-        try{
-                club.agregarDisciplina(disciplina2)
-                println("Se agrego correctamente la disciplina ${disciplina2.nombre}, cupos disponibles: ${disciplina2.cantidadCuposDisponibles()}")
-        }catch(e: Exception){
-                println(e.message)
-        }
-
-        println("\n-Agregando disciplina ${disciplina1.nombre} al club: ")
-        try{
-                club.agregarDisciplina(disciplina1)
-                println("NO DEBERIA PONER AGREGARSE LA DISCIPLINA ${disciplina1.nombre} ya que se agrego anteriormente")
-        }catch(e: Exception){
-                println(e.message)
-        }
-
-
-        /*************** CLUB - Tomar todas las disciplinas ***************/
-        println("\n•Tomar todas las disciplinas del club:")
-        club.tomarDisciplinas().forEach {println("-Nombre: ${it.nombre}, cupos: (${it.capacidadMaxima - it.cantidadCuposDisponibles()}/${it.capacidadMaxima})")}
-
-
-        /*************** CLUB - Inscribir socio a disciplina ***************/
-        println("\n•Inscribiendo socio a disciplinas")
-        println("\n-Agregando socio1 a disciplina1:")
-        try{
-                club.inscribirSocioADisciplina(socioTest1, disciplina1)
-                println("Se inscribio correctamente a la disciplina")
-        }catch(e: Exception){
-                println(e.message)
-        }
-
-        println("\n-Agregando socio1 a disciplina1 por segunda vez: DEBERIA FALLAR")
-        try{
-                club.inscribirSocioADisciplina(socioTest1, disciplina1)
-                println("Se inscribio correctamente a la disciplina")
-        }catch(e: Exception){
-                println(e.message)
-        }
-
-
-        /*************** CLUB - Deudas y Pagos ***************/
-
-        println("\n•Testeando deudas:")
-        println("-Inscribiendo al socio2 en la disciplina2:")
-        try{
-                club.inscribirSocioADisciplina(socioTest2, disciplina2)
-                println("Se inscribio correctamente a la disciplina")
-        }catch(e: Exception){
-                println(e.message)
-        }
-
-        println("\n-Todas las deudas del socio2: ")
-        socioTest2.tomarDeudas().forEach { println("Disciplina: ${it.disciplina.nombre}, Mes: ${it.mes}, Anio: ${it.anio}, Monto: ${it.monto}") }
-
-        println("\n-Inscribiendo al socio2 en la disciplina2: NO DEBERIA DEJAR INSCRIBIRSE YA QUE TIENE UNA DEUDA Y ENCIMA ES LA MISMA DISCIPLINA ANOTADA")
-        try{
-                club.inscribirSocioADisciplina(socioTest2, disciplina2)
-                println("Se inscribio correctamente a la disciplina")
-        }catch(e: Exception){
-                println(e.message)
-        }
-
-        println("\n-Pagando deuda de la disciplina2 (${disciplina2.nombre}): ")
-        try {
-                val deudaEncontrada = socioTest2.tomarDeudaEnDisciplina(disciplina2)
-
-                if(deudaEncontrada != null){
-                        club.pagarDeuda(socioTest2, deudaEncontrada)
-                        println("Deuda pagada correctamente.")
-                }else{
-                        println("No hay deuda pendiente para esa disciplina.")
-                }
-        }catch(e: Exception){
-                println(e.message)
-        }
-
-        println("\n-Inscribiendo al socio2 en la disciplina2: NO DEBERIA DEJAR INSCRIBIRSE YA QUE ES LA MISMA DISCIPLINA ANOTADA")
-        try{
-                club.inscribirSocioADisciplina(socioTest2, disciplina2)
-                println("Se inscribio correctamente a la disciplina")
-        }catch(e: Exception){
-                println(e.message)
-        }
-
-        println("\n-Inscribiendo al socio2 en la disciplina3 (${disciplina3.nombre}): DEBERIA DEJAR YA QUE NO TIENE DEUDAS Y NO ESTA ANOTADA")
-        try{
-                club.inscribirSocioADisciplina(socioTest2, disciplina3)
-                println("Se inscribio correctamente a la disciplina")
-        }catch(e: Exception){
-                println(e.message)
-        }
-
-        socioTest2.tomarDeudas()
-        println("\n-Todas las deudas del socio2: ")
-        socioTest2.tomarDeudas().forEach { println("Disciplina: ${it.disciplina.nombre}, Mes: ${it.mes}, Anio: ${it.anio}, Monto: ${it.monto}") }
-
-        println("\n-Todas los pagos del socio2: ")
-        socioTest2.tomarPagos().forEach { println("Disciplina: ${it.disciplina.nombre}, Mes: ${it.mesCuota}, Anio: ${it.anioCuota}, Monto: ${it.monto}, Fecha de pago: ${it.fechaDePago}") }
-
-
-        */
-
-
 }
 
+fun ingresarNombre(): String {
+        val nombre: String
+        while (true) {
+                print("Nombre del socio: ")
+                val nombreInput = readlnOrNull()?.trim() ?: ""
+
+                if (nombreInput.isEmpty()) {
+                        println("Debes completar el nombre para continuar.")
+                } else if (nombreInput.any { it.isDigit() }) {
+                        println("El nombre no debe contener números.")
+                } else {
+                        nombre = nombreInput
+                        break
+                }
+        }
+        return nombre
+}
+
+fun ingresarDNI(): Int {
+        val dni: Int
+        while (true) {
+                print("DNI del socio: ")
+                val input = readlnOrNull()
+                val dniInput = input?.toIntOrNull()
+
+                if (dniInput == null) {
+                        println("Debes ingresar un número de DNI válido.")
+                } else {
+                        dni = dniInput
+                        break
+                }
+        }
+        return dni
+}
+
+fun ingresarSexo(): Sexo {
+        val sexo: Sexo
+        while (true) {
+                print("Sexo (${Sexo.entries.joinToString("/") { it.name }}): ")
+                val sexoInput = readlnOrNull()?.trim()?.uppercase() ?: ""
+
+                if (Sexo.entries.any { it.name == sexoInput }) {
+                        sexo = Sexo.valueOf(sexoInput)
+                        break
+                } else {
+                        println("Sexo inválido. Debe ser ${Sexo.entries.joinToString("/") { it.name }}.")
+                }
+        }
+        return sexo
+}
+
+fun ingresarEmail(): String? {
+        val email: String?
+        while (true) {
+                print("Email (dejar vacío si no desea agregar uno): ")
+                val emailInput = readlnOrNull()?.trim()
+
+                if (emailInput.isNullOrEmpty()) {
+                        email = null
+                        break
+                } else if (Regex("^[\\w.-]+@[\\w.-]+\\.\\w{2,}$").matches(emailInput)) {
+                        email = emailInput
+                        break
+                } else {
+                        println("Formato de email inválido. Ejemplo válido: correo@ejemplo.com")
+                }
+        }
+        return email
+}
+
+fun ingresarDisciplina(): String {
+        var nombre: String
+        while (true) {
+                print("Nombre de la disciplina: ")
+                nombre = readlnOrNull()?.trim() ?: ""
+
+                if (nombre.isEmpty()) {
+                        println("El nombre de la disciplina no puede estar vacío. Por favor, ingrésalo nuevamente.")
+                }else {
+                        break
+                }
+        }
+        return nombre
+}
+
+fun ingresarTipoDisciplina(): TipoDisciplina {
+        val tipo: TipoDisciplina
+        while (true) {
+                print("Tipo (${TipoDisciplina.entries.joinToString("/") { it.name }}): ")
+                val tipoInput = readlnOrNull()?.trim()?.uppercase() ?: ""
+
+                if (TipoDisciplina.entries.any { it.name == tipoInput }) {
+                        tipo = TipoDisciplina.valueOf(tipoInput)
+                        break
+                } else {
+                        println("Tipo inválido. Debe ser uno de los siguientes: ${TipoDisciplina.entries.joinToString("/") { it.name }}.")
+                }
+        }
+        return tipo
+}
+
+fun ingresarCapacidadMaxima(): Int{
+        var capacidad: Int
+        while (true) {
+                print("Capacidad máxima: ")
+                capacidad = readlnOrNull()?.toIntOrNull() ?: -1
+
+                if (capacidad >= 0) {
+                        break
+                } else {
+                        println("La capacidad máxima debe ser mayor o igual a 0. Inténtalo nuevamente.")
+                }
+        }
+        return capacidad
+}
+
+fun ingresarCostoMensual(): Double {
+        var costo: Double
+        while (true) {
+                print("Costo mensual: ")
+                costo = readlnOrNull()?.toDoubleOrNull() ?: -1.0
+
+                if (costo >= 0.0) {
+                        break
+                } else {
+                        println("El costo mensual debe ser mayor o igual a 0. Inténtalo nuevamente.")
+                }
+        }
+        return costo
+}

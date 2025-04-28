@@ -13,18 +13,10 @@ class Club(
 
     fun agregarSocio(socio: Socio){
         if(this.socioYaRegistrado(socio.dni, socio.sexo)){
-            throw Exception("El socio ${socio.nombre} ya se encontraba registrado.")
+            throw Exception("El socio con DNI: ${socio.dni} y sexo: ${socio.sexo} ya se encontraba registrado.")
         }
         this.socios.add(socio)
     }
-
-//    fun eliminarSocio(socio: Socio){
-//        if(this.socioYaRegistrado(socio.dni, socio.sexo)){
-//            this.socios.remove(socio)
-//        }else {
-//            throw Exception("Socio inexistente.")
-//        }
-//    }
 
     private fun socioYaRegistrado(dni: Int, sexo: Sexo): Boolean {
         return this.socios.any { it.dni == dni && it.sexo == sexo}
@@ -32,13 +24,6 @@ class Club(
 
     fun tomarSocios(): MutableSet<Socio> {
         return this.socios
-    }
-
-    fun pintarInformacionSocios(){
-        println("\n•Socios inscriptos en el club")
-        this.socios.forEach {
-            println("Id: ${it.id}, Nombre: ${it.nombre}, Dni: ${it.dni}, Sexo: ${it.sexo}${it.email?.let { email -> ", Email: $email" } ?: ""}")
-        }
     }
 
     fun agregarDisciplina(disciplina: Disciplina) {
@@ -51,14 +36,22 @@ class Club(
     fun eliminarDisciplina(disciplina: String) {
         if(this.disciplinaYaRegistrada(disciplina)) {
             val disciplinaAEliminar = buscarDisciplinaPorNombre(disciplina)
-            this.disciplinas.remove(disciplinaAEliminar)
-            println("Disciplina Eliminada Correctamente.")
+
+            if(disciplinaAEliminar != null){
+                this.socios.forEach { socio ->
+                    socio.eliminarInscripcion(disciplinaAEliminar)
+                }
+                this.disciplinas.remove(disciplinaAEliminar)
+                println("Disciplina eliminada correctamente.")
+            }else {
+                throw Exception("No existe la disciplina $disciplina.")
+            }
         } else {
-            throw Exception("Disiplina Inexistente.")
+            throw Exception("No existe la disciplina $disciplina.")
         }
     }
 
-    fun disciplinaYaRegistrada(nombre: String): Boolean {
+    private fun disciplinaYaRegistrada(nombre: String): Boolean {
         return this.disciplinas.any { it.nombre == nombre}
     }
 
@@ -85,7 +78,7 @@ class Club(
     }
 
     fun pagarDeuda(socio: Socio, deuda: Deuda){
-        if (!socio.tomarDeudas().contains(deuda)) {
+        if (!socio.obtenerDeudas().contains(deuda)) {
             throw Exception("La deuda seleccionada no pertenece al socio ${socio.nombre}.")
         }
         socio.eliminarDeuda(deuda)
@@ -100,19 +93,6 @@ class Club(
         }
         inscripcionBuscada.estado = EstadoInscripcion.CANCELADA
     }
-
-    // INTENTO DE FUNCION
-//    fun darDeBajaInscripcion(socioInput: Int, disciplinaInput: String){
-//
-//        val disciplina = buscarDisciplinaPorNombre(disciplinaInput)
-//        val socio = buscarSocioPorDni(socioInput)
-//        if () {
-//
-//        }
-//        val inscripcionBuscada = socio!!.tomarInscripciones().find { it.disciplina == disciplina }
-//
-//        inscripcionBuscada!!.estado = EstadoInscripcion.INACTIVA
-//    }
 
     fun procesarMesNuevo() {
         val diaActual = LocalDate.now()
@@ -132,7 +112,7 @@ class Club(
                     }
                     EstadoInscripcion.ACTIVA -> {
                         val mesAnterior = diaActual.minusMonths(1)
-                        val deudaMesAnterior = socio.tomarDeudas().any {
+                        val deudaMesAnterior = socio.obtenerDeudas().any {
                             it.disciplina == disciplina &&
                             it.mes == mesAnterior.month &&
                             it.anio == mesAnterior.year
@@ -152,8 +132,8 @@ class Club(
         }
     }
 
-    fun buscarSocioPorDni(dni: Int): Socio? {
-        return socios.find { it.dni == dni }
+    fun buscarSocioPorDniYSexo(dni: Int, sexo: Sexo): Socio? {
+        return socios.find { it.dni == dni && it.sexo == sexo}
     }
 
     fun buscarDisciplinaPorNombre(nombre: String): Disciplina? {

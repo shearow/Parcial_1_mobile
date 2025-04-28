@@ -12,8 +12,8 @@ class Disciplina(
     var capacidadMaxima: Int = if(capacidadMaxima < 0) 0 else capacidadMaxima
     private var sociosInscriptos = mutableSetOf<Socio>()
 
-    private fun validarSocioYaInscripto(socio: Socio): Boolean {
-        return this.sociosInscriptos.any { it == socio }
+    private fun validarSocioYaInscripto(nombre: String): Boolean {
+        return this.sociosInscriptos.any { it.nombre == nombre }
     }
 
     fun tieneCuposDisponibles(): Boolean {
